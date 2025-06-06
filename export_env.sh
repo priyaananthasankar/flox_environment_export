@@ -11,7 +11,7 @@ fi
 ENV_NAME="$1"
 FLOX_DIR=".flox"
 RUN_DIR="$FLOX_DIR/run"
-SIMPLE_STORE="./simple-store"
+SIMPLE_STORE="$(pwd)/simple-store"
 EXPORT_DIR="export"
 ARCHIVE1="$EXPORT_DIR/simple-store.tar.gz"
 ARCHIVE2="$EXPORT_DIR/flox-folder.tar.gz"
@@ -57,8 +57,8 @@ echo "Tar and gzip .flox folder"
 tar -czf "$ARCHIVE2" "$FLOX_DIR"
 
 # nix copy command
-echo "Running: nix copy \"$FLOX_RUN_PATH\" --to \"$SIMPLE_STORE\" --no-check-sigs"
-if ! nix copy "$FLOX_RUN_PATH" --to "$SIMPLE_STORE" --no-check-sigs; then
+echo "Running: nix copy \"$FLOX_RUN_PATH\" --to \"file://$SIMPLE_STORE\" --no-check-sigs"
+if ! nix copy "$FLOX_RUN_PATH" --to "file://$SIMPLE_STORE" --no-check-sigs --extra-experimental-features nix-command; then
   echo "Error: nix copy failed."
   exit 1
 fi
