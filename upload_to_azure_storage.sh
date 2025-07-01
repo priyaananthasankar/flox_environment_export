@@ -15,6 +15,26 @@ fi
 read -s -p "Enter Azure Storage Account Key: " ACCOUNT_KEY
 echo
 
+# Check if the file share exists; if not, create it
+SHARE_EXISTS=$(az storage share exists \
+    --account-name "$STORAGE_ACCOUNT" \
+    --account-key "$ACCOUNT_KEY" \
+    --name "$FILE_SHARE" \
+    --query "exists" \
+    --output tsv)
+
+if [[ "$SHARE_EXISTS" != "true" ]]; then
+    echo "File share '$FILE_SHARE' does not exist. Creating it..."
+    az storage share create \
+        --account-name "$STORAGE_ACCOUNT" \
+        --account-key "$ACCOUNT_KEY" \
+        --name "$FILE_SHARE"
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to create file share '$FILE_SHARE'."
+        exit 1
+    fi
+fi
+
 if [[ -z "$SHARE_DIR" ]]; then
     SHARE_DIR="flox_environment"
     # Check if directory exists in Azure File Share
@@ -43,8 +63,6 @@ if [[ -z "$EXPORT_DIR" || -z "$STORAGE_ACCOUNT" || -z "$FILE_SHARE" || -z "$SHAR
     echo "Usage: $0 <export_folder> <storage_account> <file_share> <share_directory>"
     exit 1
 fi
-
-
 
 FILES=("flox-folder.tar.gz" "simple-store.tar.gz")
 

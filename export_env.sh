@@ -52,6 +52,10 @@ fi
 # Create export directory
 mkdir -p "$EXPORT_DIR"
 
+# Give 777 permissions to .flox directory and its contents
+echo "Setting permissions 777 on $FLOX_DIR and its contents"
+chmod -R 777 "$FLOX_DIR"
+
 # Tar and gzip .flox folder
 echo "Tar and gzip .flox folder"
 tar -czf "$ARCHIVE2" "$FLOX_DIR"
