@@ -43,9 +43,9 @@ jobs:
           ENV_NAME="ci-flox-env"
 
           if [ -z "$VERSION" ]; then
-            INSTALL_CMD="flox install $ENV_NAME $LIBRARY"
+            INSTALL_CMD="flox install $LIBRARY"
           else
-            INSTALL_CMD="flox install $ENV_NAME $LIBRARY@$VERSION"
+            INSTALL_CMD="flox install $LIBRARY@$VERSION"
           fi
 
           docker run --rm \
@@ -58,16 +58,12 @@ jobs:
               cd /workspace
               # Install flox via RPM using tdnf
               tdnf install -y ca-certificates
-              tdnf install -y wget
-              tdnf install -y sudo
-              tdnf install -y tar
-              tdnf install -y gzip
+              tdnf install -y wget tar gzip bash coreutils which sudo shadow-utils
               wget -P /tmp/ https://downloads.flox.dev/by-env/stable/rpm/flox-1.4.4.x86_64-linux.rpm && rpm -ivh /tmp/flox-1.4.4.x86_64-linux.rpm
               tdnf install -y /tmp/flox.rpm
-              # Add flox and nix to PATH if needed
-              #export PATH=/home/nixuser/.nix-profile/bin:\$PATH
+  
               # Create flox environment and install library
-              #mkdir $ENV_NAME && cd $ENV_NAME
+              mkdir $ENV_NAME && cd $ENV_NAME
               #flox init
               #$INSTALL_CMD
               # Export environment
