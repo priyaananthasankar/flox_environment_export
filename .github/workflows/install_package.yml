@@ -58,13 +58,14 @@ jobs:
               tdnf install -y util-linux which git wget bash coreutils which sudo tar gzip
               chmod +x /workspace/chroot-flox-install.sh
               /workspace/chroot-flox-install.sh
-
+              chown -R nixuser:nixuser /home/nixuser
+              su - nixuser
               # Create flox environment and install library
-              mkdir $ENV_NAME && cd $ENV_NAME
-              flox init && flox activate
+              mkdir /home/nixuser/$ENV_NAME && cd /home/nixuser/$ENV_NAME
+              flox init
               $INSTALL_CMD
               # Export environment
-              /workspace/export_env.sh $ENV_NAME
+              /workspace/export_env.sh /home/nixuser/$ENV_NAME
               # Upload to Azure Storage
               #./upload_to_azure_storage.sh ./export $STORAGE_ACCOUNT $STORAGE_KEY $STORAGE_FILE_SHARE
             "
