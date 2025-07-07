@@ -43,11 +43,11 @@ jobs:
           ENV_NAME="ci-flox-env"
 
           if [ -z "$VERSION" ]; then
-          INSTALL_CMD="flox install $ENV_NAME $LIBRARY"
+            INSTALL_CMD="flox install $ENV_NAME $LIBRARY"
           else
-          INSTALL_CMD="flox install $ENV_NAME $LIBRARY@$VERSION"
+            INSTALL_CMD="flox install $ENV_NAME $LIBRARY@$VERSION"
           fi
-          
+
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             -e AZURE_STORAGE_KEY="$STORAGE_KEY" \
