@@ -58,8 +58,8 @@ jobs:
               cd /workspace
               # Install flox via RPM using tdnf
               tdnf install -y ca-certificates
-              tdnf install -y https://github.com/flox/flox/releases/latest/download/flox.x86_64.rpm
-
+              wget https://downloads.flox.dev/by-env/stable/rpm/flox-latest.x86_64.rpm -O /tmp/flox.rpm
+              tdnf install -y /tmp/flox.rpm
               # Add flox and nix to PATH if needed
               #export PATH=/home/nixuser/.nix-profile/bin:\$PATH
               # Create flox environment and install library
