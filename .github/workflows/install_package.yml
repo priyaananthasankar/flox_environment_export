@@ -56,6 +56,7 @@ jobs:
               set -e
               tdnf install -y ca-certificates
               tdnf install -y shadow-utils
+              which runuser
               tdnf install -y wget bash coreutils which sudo tar gzip
               chmod +x /workspace/chroot-flox-install.sh
               /workspace/chroot-flox-install.sh
