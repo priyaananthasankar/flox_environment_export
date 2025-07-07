@@ -51,7 +51,6 @@ jobs:
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             -e AZURE_STORAGE_KEY="$STORAGE_KEY" \
-            --privileged \
             mcr.microsoft.com/cbl-mariner/base/core:2.0 \
             bash -c "
               set -e
