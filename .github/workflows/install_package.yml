@@ -1,0 +1,65 @@
+name: Export Flox Environment and Upload to Azure
+
+on:
+  workflow_dispatch:
+    inputs:
+      library_name:
+        description: 'Library name to install'
+        required: true
+      version:
+        description: 'Library version (optional)'
+        required: false
+      azure_storage_name:
+        description: 'Azure Storage Account Name'
+        required: true
+      storage_key:
+        description: 'Azure Storage Account Key'
+        required: true
+        type: secret
+
+jobs:
+  export-and-upload:
+    runs-on: ubuntu-latest
+    env:
+      AZURE_STORAGE_KEY: ${{ secrets.storage_key }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker
+        run: |
+          docker pull mcr.microsoft.com/cbl-mariner/base/core:2.0
+
+      - name: Run Flox export in container
+        run: |
+          LIBRARY="${{ github.event.inputs.library_name }}"
+          VERSION="${{ github.event.inputs.version }}"
+          STORAGE_ACCOUNT="${{ github.event.inputs.azure_storage_name }}"
+          STORAGE_KEY="${{ secrets.storage_key }}"
+          ENV_NAME="ci-flox-env"
+
+          # Compose install command
+          if [ -z "$VERSION" ]; then
+            INSTALL_CMD="flox install $ENV_NAME $LIBRARY"
+          else
+            INSTALL_CMD="flox install $ENV_NAME $LIBRARY@$VERSION"
+          fi
+
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            -e AZURE_STORAGE_KEY="$STORAGE_KEY" \
+            mcr.microsoft.com/cbl-mariner/base/core:2.0 \
+            bash -c "
+              set -e
+              cd /workspace
+              # Install prerequisites
+              curl -L https://github.com/flox/flox/releases/latest/download/flox-linux-x86_64 -o /usr/local/bin/flox && chmod +x /usr/local/bin/flox
+              curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+              # Create flox environment and install library
+              flox env create $ENV_NAME
+              $INSTALL_CMD
+              # Export environment
+              ./export_env.sh $ENV_NAME
+              # Upload to Azure Storage
+              ./upload_to_azure_storage.sh export $STORAGE_ACCOUNT flox-exports
+            "
