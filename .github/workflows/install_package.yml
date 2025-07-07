@@ -56,8 +56,9 @@ jobs:
             bash -c "
               set -e
               cd /workspace
-              chmod +x chroot-flox-install.sh
-              ./chroot-flox-install.sh
+              # Install flox via RPM using tdnf
+              tdnf install -y https://github.com/flox/flox/releases/latest/download/flox.x86_64.rpm
+
               # Add flox and nix to PATH if needed
               #export PATH=/home/nixuser/.nix-profile/bin:\$PATH
               # Create flox environment and install library
