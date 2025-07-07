@@ -12,6 +12,9 @@ on:
       azure_storage_name:
         description: 'Azure Storage Account Name'
         required: true
+      azure_storage_file_share:
+        description: 'Azure Storage File Share Name'
+        required: true
       storage_key:
         description: 'Azure Storage Account Key'
         required: false
@@ -35,15 +38,11 @@ jobs:
           LIBRARY="${{ github.event.inputs.library_name }}"
           VERSION="${{ github.event.inputs.version }}"
           STORAGE_ACCOUNT="${{ github.event.inputs.azure_storage_name }}"
+          STORAGE_FILE_SHARE="${{ github.event.inputs.azure_storage_file_share }}
           STORAGE_KEY="${{ secrets.storage_key }}"
           ENV_NAME="ci-flox-env"
 
-          if [ -z "$VERSION" ]; then
-            INSTALL_CMD="flox install $ENV_NAME $LIBRARY"
-          else
-            INSTALL_CMD="flox install $ENV_NAME $LIBRARY@$VERSION"
-          fi
-
+          INSTALL_CMD="flox install $LIBRARY@$VERSION"
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             -e AZURE_STORAGE_KEY="$STORAGE_KEY" \
@@ -57,10 +56,11 @@ jobs:
               # Add flox and nix to PATH if needed
               export PATH=/home/nixuser/.nix-profile/bin:\$PATH
               # Create flox environment and install library
-              flox env create $ENV_NAME
+              mkdir $ENV_NAME && cd $ENV_NAME
+              flox init
               $INSTALL_CMD
               # Export environment
               ./export_env.sh $ENV_NAME
               # Upload to Azure Storage
-              ./upload_to_azure_storage.sh export $STORAGE_ACCOUNT flox-exports
+              ./upload_to_azure_storage.sh ./export $STORAGE_ACCOUNT $STORAGE_KEY $STORAGE_FILE_SHARE
             "

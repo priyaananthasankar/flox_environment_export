@@ -1,24 +1,23 @@
 #!/bin/bash
 
-# Usage: ./upload_to_azure_storage.sh /path/to/export <storage_account> <file_share> [<share_directory>]
+# Usage: ./upload_to_azure_storage.sh /path/to/export <storage_account> <file_share> <storage_account_key> [<share_directory>]
 
 EXPORT_DIR="$1"
 STORAGE_ACCOUNT="$2"
 FILE_SHARE="$3"
 SHARE_DIR="$4"
+STORAGE_KEY="$5"
 
 if [[ -z "$EXPORT_DIR" || -z "$STORAGE_ACCOUNT" || -z "$FILE_SHARE" ]]; then
-    echo "Usage: $0 <export_folder> <storage_account> <file_share> [<share_directory>]"
+    echo "Usage: $0 <export_folder> <storage_account> <file_share> <storage_account_key> [<share_directory>]"
     exit 1
 fi
-
-read -s -p "Enter Azure Storage Account Key: " ACCOUNT_KEY
 echo
 
 # Check if the file share exists; if not, create it
 SHARE_EXISTS=$(az storage share exists \
     --account-name "$STORAGE_ACCOUNT" \
-    --account-key "$ACCOUNT_KEY" \
+    --account-key "$STORAGE_KEY" \
     --name "$FILE_SHARE" \
     --query "exists" \
     --output tsv)
@@ -27,7 +26,7 @@ if [[ "$SHARE_EXISTS" != "true" ]]; then
     echo "File share '$FILE_SHARE' does not exist. Creating it..."
     az storage share create \
         --account-name "$STORAGE_ACCOUNT" \
-        --account-key "$ACCOUNT_KEY" \
+        --account-key "$STORAGE_KEY" \
         --name "$FILE_SHARE"
     if [[ $? -ne 0 ]]; then
         echo "Failed to create file share '$FILE_SHARE'."
@@ -40,7 +39,7 @@ if [[ -z "$SHARE_DIR" ]]; then
     # Check if directory exists in Azure File Share
     DIR_EXISTS=$(az storage directory exists \
         --account-name "$STORAGE_ACCOUNT" \
-        --account-key "$ACCOUNT_KEY" \
+        --account-key "$STORAGE_KEY" \
         --share-name "$FILE_SHARE" \
         --name "$SHARE_DIR" \
         --query "exists" \
@@ -49,7 +48,7 @@ if [[ -z "$SHARE_DIR" ]]; then
         echo "Directory '$SHARE_DIR' does not exist. Creating it..."
         az storage directory create \
             --account-name "$STORAGE_ACCOUNT" \
-            --account-key "$ACCOUNT_KEY" \
+            --account-key "$STORAGE_KEY" \
             --share-name "$FILE_SHARE" \
             --name "$SHARE_DIR"
         if [[ $? -ne 0 ]]; then
@@ -75,7 +74,7 @@ for FILE in "${FILES[@]}"; do
 
     az storage file upload \
         --account-name "$STORAGE_ACCOUNT" \
-        --account-key "$ACCOUNT_KEY" \
+        --account-key "$STORAGE_KEY" \
         --share-name "$FILE_SHARE" \
         --source "$FILE_PATH" \
         --path "$SHARE_DIR/$FILE"
