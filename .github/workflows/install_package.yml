@@ -14,7 +14,7 @@ on:
         required: true
       storage_key:
         description: 'Azure Storage Account Key'
-        required: true
+        required: false
         type: secret
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Docker
+      - name: Pull Azure Linux Mariner image
         run: |
           docker pull mcr.microsoft.com/cbl-mariner/base/core:2.0
 
@@ -38,7 +38,6 @@ jobs:
           STORAGE_KEY="${{ secrets.storage_key }}"
           ENV_NAME="ci-flox-env"
 
-          # Compose install command
           if [ -z "$VERSION" ]; then
             INSTALL_CMD="flox install $ENV_NAME $LIBRARY"
           else
@@ -48,13 +47,15 @@ jobs:
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             -e AZURE_STORAGE_KEY="$STORAGE_KEY" \
+            --privileged \
             mcr.microsoft.com/cbl-mariner/base/core:2.0 \
             bash -c "
               set -e
               cd /workspace
-              # Install prerequisites
-              curl -L https://github.com/flox/flox/releases/latest/download/flox-linux-x86_64 -o /usr/local/bin/flox && chmod +x /usr/local/bin/flox
-              curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+              chmod +x chroot-flox-install.sh
+              sudo ./chroot-flox-install.sh
+              # Add flox and nix to PATH if needed
+              export PATH=/home/nixuser/.nix-profile/bin:\$PATH
               # Create flox environment and install library
               flox env create $ENV_NAME
               $INSTALL_CMD
