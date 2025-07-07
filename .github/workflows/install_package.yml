@@ -55,26 +55,16 @@ jobs:
             bash -c "
               set -e
               tdnf install -y ca-certificates
-              tdnf install -y util-linux which git
-              which runuser
-              tdnf install -y wget bash coreutils which sudo tar gzip
+              tdnf install -y util-linux which git wget bash coreutils which sudo tar gzip
               chmod +x /workspace/chroot-flox-install.sh
               /workspace/chroot-flox-install.sh
-              # Install flox via RPM using tdnf
-              #
-              #wget https://downloads.flox.dev/by-env/stable/rpm/flox-1.5.0.x86_64-linux.rpm -O /tmp/flox.rpm
-              #sudo rpm --import https://downloads.flox.dev/by-env/stable/rpm/flox-archive-keyring.asc
-              #sudo rpm -ivh /tmp/flox.rpm
-              #rpm -qp --scripts /tmp/flox.rpm
-              #wget -P /tmp/ https://downloads.flox.dev/by-env/stable/rpm/flox-1.4.4.x86_64-linux.rpm && rpm -ivh /tmp/flox-1.4.4.x86_64-linux.rpm
-              #tdnf install -y /tmp/flox.rpm
-  
+
               # Create flox environment and install library
               mkdir $ENV_NAME && cd $ENV_NAME
               flox init
-              #$INSTALL_CMD
+              $INSTALL_CMD
               # Export environment
-              #./export_env.sh $ENV_NAME
+              ./export_env.sh $ENV_NAME
               # Upload to Azure Storage
               #./upload_to_azure_storage.sh ./export $STORAGE_ACCOUNT $STORAGE_KEY $STORAGE_FILE_SHARE
             "
