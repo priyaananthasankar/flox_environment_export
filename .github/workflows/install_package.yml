@@ -64,7 +64,7 @@ jobs:
               flox init && flox activate
               $INSTALL_CMD
               # Export environment
-              ./export_env.sh $ENV_NAME
+              /workspace/export_env.sh $ENV_NAME
               # Upload to Azure Storage
               #./upload_to_azure_storage.sh ./export $STORAGE_ACCOUNT $STORAGE_KEY $STORAGE_FILE_SHARE
             "
