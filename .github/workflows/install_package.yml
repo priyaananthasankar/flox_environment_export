@@ -56,7 +56,7 @@ jobs:
               set -e
               cd /workspace
               chmod +x /workspace/chroot-flox-install.sh
-              ./workspace/chroot-flox-install.sh
+              /workspace/chroot-flox-install.sh
               # Install flox via RPM using tdnf
               #tdnf install -y ca-certificates
               #tdnf install -y wget bash coreutils which sudo shadow-utils findutils tar gzip      
