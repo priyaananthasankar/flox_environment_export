@@ -53,17 +53,17 @@ jobs:
             -e AZURE_STORAGE_KEY="$STORAGE_KEY" \
             mcr.microsoft.com/cbl-mariner/base/core:2.0 \
             bash -c "
-              set -e
               tdnf install -y ca-certificates
               tdnf install -y util-linux which git wget bash coreutils which sudo tar gzip
               chmod +x /workspace/chroot-flox-install.sh
               /workspace/chroot-flox-install.sh
               chown -R nixuser:nixuser /home/nixuser
-              su - nixuser
               # Create flox environment and install library
-              mkdir /home/nixuser/$ENV_NAME && cd /home/nixuser/$ENV_NAME
-              flox init
-              $INSTALL_CMD
+                su - nixuser -c "
+                mkdir /home/nixuser/$ENV_NAME && cd /home/nixuser/$ENV_NAME
+                flox init
+                $INSTALL_CMD
+                "
               # Export environment
               /workspace/export_env.sh /home/nixuser/$ENV_NAME
               # Upload to Azure Storage
