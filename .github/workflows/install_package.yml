@@ -60,12 +60,12 @@ jobs:
               chown -R nixuser:nixuser /home/nixuser
               # Create flox environment and install library
                 su - nixuser <<EOF
-                mkdir /home/nixuser/$ENV_NAME && cd /home/nixuser/$ENV_NAME
-                flox init
-                $INSTALL_CMD
+                        mkdir /home/nixuser/$ENV_NAME && cd /home/nixuser/$ENV_NAME
+                        flox init
+                        $INSTALL_CMD
                 EOF
               # Export environment
               /workspace/export_env.sh /home/nixuser/$ENV_NAME
               # Upload to Azure Storage
-              #./upload_to_azure_storage.sh ./export $STORAGE_ACCOUNT $STORAGE_KEY $STORAGE_FILE_SHARE
+              /workspace/upload_to_azure_storage.sh /home/nixuser/$ENV_NAME/export $STORAGE_ACCOUNT $STORAGE_KEY $STORAGE_FILE_SHARE
             "
