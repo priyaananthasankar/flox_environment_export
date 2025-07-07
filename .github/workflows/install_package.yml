@@ -54,7 +54,7 @@ jobs:
             mcr.microsoft.com/cbl-mariner/base/core:2.0 \
             bash -c "
               tdnf install -y ca-certificates
-              tdnf install -y util-linux which git wget bash coreutils which sudo tar gzip
+              tdnf install -y util-linux which git wget bash coreutils which sudo tar gzip azure-cli
               chmod +x /workspace/chroot-flox-install.sh
               /workspace/chroot-flox-install.sh
               chown -R nixuser:nixuser /home/nixuser
