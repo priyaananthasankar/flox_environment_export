@@ -1,4 +1,4 @@
-name: Export Flox Environment and Upload to Azure
+name: Export and Upload Flox Environment
 
 on:
   workflow_dispatch:
