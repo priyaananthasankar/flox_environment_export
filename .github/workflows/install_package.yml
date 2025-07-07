@@ -59,13 +59,13 @@ jobs:
               chmod +x chroot-flox-install.sh
               sudo ./chroot-flox-install.sh
               # Add flox and nix to PATH if needed
-              export PATH=/home/nixuser/.nix-profile/bin:\$PATH
+              #export PATH=/home/nixuser/.nix-profile/bin:\$PATH
               # Create flox environment and install library
-              mkdir $ENV_NAME && cd $ENV_NAME
-              flox init
-              $INSTALL_CMD
+              #mkdir $ENV_NAME && cd $ENV_NAME
+              #flox init
+              #$INSTALL_CMD
               # Export environment
-              ./export_env.sh $ENV_NAME
+              #./export_env.sh $ENV_NAME
               # Upload to Azure Storage
-              ./upload_to_azure_storage.sh ./export $STORAGE_ACCOUNT $STORAGE_KEY $STORAGE_FILE_SHARE
+              #./upload_to_azure_storage.sh ./export $STORAGE_ACCOUNT $STORAGE_KEY $STORAGE_FILE_SHARE
             "
