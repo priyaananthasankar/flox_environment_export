@@ -57,7 +57,7 @@ jobs:
               set -e
               cd /workspace
               chmod +x chroot-flox-install.sh
-              sudo ./chroot-flox-install.sh
+              ./chroot-flox-install.sh
               # Add flox and nix to PATH if needed
               #export PATH=/home/nixuser/.nix-profile/bin:\$PATH
               # Create flox environment and install library
