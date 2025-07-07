@@ -55,7 +55,7 @@ jobs:
             bash -c "
               set -e
               tdnf install -y ca-certificates
-              tdnf install -y util-linux which
+              tdnf install -y util-linux which git
               which runuser
               tdnf install -y wget bash coreutils which sudo tar gzip
               chmod +x /workspace/chroot-flox-install.sh
