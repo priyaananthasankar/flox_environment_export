@@ -58,6 +58,7 @@ jobs:
               cd /workspace
               # Install flox via RPM using tdnf
               tdnf install -y ca-certificates
+              tdnf install -y wget
               wget -P /tmp/ https://downloads.flox.dev/by-env/stable/rpm/flox-1.4.4.x86_64-linux.rpm && rpm -ivh /tmp/flox-1.4.4.x86_64-linux.rpm
               tdnf install -y /tmp/flox.rpm
               # Add flox and nix to PATH if needed
