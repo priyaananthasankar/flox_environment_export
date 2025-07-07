@@ -18,7 +18,7 @@ experimental-features = nix-command flakes
 chown -R nixuser /nix
 
 # Install Nix package manager
-/usr/sbin/runuser -l nixuser -c 'sh <(curl -L https://nixos.org/nix/install) --no-daemon'
+runuser -l nixuser -c 'sh <(curl -L https://nixos.org/nix/install) --no-daemon'
 
 # Set permissions so all users can access /nix
 #chown -R root:nix-users /nix
@@ -29,7 +29,7 @@ ln -s /home/nixuser/.nix-profile/bin/nix /usr/local/bin/nix  && ln -s /home/nixu
 
 # Install flox using nix
 chown -R nixuser:nixuser /nix
-/usr/sbin/runuser -l nixuser -c '. "/home/nixuser/.nix-profile/etc/profile.d/nix.sh" && nix --extra-experimental-features "nix-command flakes" profile install --accept-flake-config github:flox/flox'
+runuser -l nixuser -c '. "/home/nixuser/.nix-profile/etc/profile.d/nix.sh" && nix --extra-experimental-features "nix-command flakes" profile install --accept-flake-config github:flox/flox'
 
 # Symlink flox to /usr/local/bin for global access
 ln -sf /home/nixuser/.nix-profile/bin/flox /usr/local/bin/flox
