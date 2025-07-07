@@ -67,7 +67,7 @@ jobs:
   
               # Create flox environment and install library
               mkdir $ENV_NAME && cd $ENV_NAME
-              #flox init
+              flox init
               #$INSTALL_CMD
               # Export environment
               #./export_env.sh $ENV_NAME
