@@ -55,7 +55,7 @@ jobs:
             bash -c "
               set -e
               cd /workspace
-              chmod +x /workspacechroot-flox-install.sh
+              chmod +x /workspace/chroot-flox-install.sh
               ./workspace/chroot-flox-install.sh
               # Install flox via RPM using tdnf
               #tdnf install -y ca-certificates
