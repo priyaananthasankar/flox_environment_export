@@ -59,7 +59,7 @@ jobs:
               # Install flox via RPM using tdnf
               tdnf install -y ca-certificates
               tdnf install -y wget bash coreutils which sudo shadow-utils findutils tar gzip      
-              wget https://downloads.flox.dev/by-env/stable/rpm/flox-latest.x86_64.rpm -O /tmp/flox.rpm
+              wget https://downloads.flox.dev/by-env/stable/rpm/flox-1.5.0.x86_64-linux.rpm -O /tmp/flox.rpm
               sudo rpm --import https://downloads.flox.dev/by-env/stable/rpm/flox-archive-keyring.asc
               sudo rpm -ivh /tmp/flox.rpm
               
