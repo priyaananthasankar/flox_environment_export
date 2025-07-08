@@ -64,6 +64,8 @@ jobs:
                         flox init
                         $INSTALL_CMD
                 EOF
+              # Make the flox and simple store world writable 
+              chmod -R 777 .flox simple-store
               # Export environment
               /workspace/export_env.sh /home/nixuser/$ENV_NAME
               # Upload to Azure Storage
