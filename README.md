@@ -17,14 +17,21 @@ Easily export your Flox environment and upload it to Azure Storage for backup or
 
 A sample GitHub Action workflow is provided in `.github/workflows/export-and-upload.yml` to automate exporting your Flox environment and uploading it to Azure; simply customize the workflow file with your environment and Azure credentials to use it in your CI/CD pipeline.
 
-To run the GitHub Action, navigate to the "Actions" tab in the repository and select the workflow.
+To run the GitHub Action, do the following:
+
+- Fork the repo
+
+- Configure Azure Storage Access Key 
+
+![alt text](./imgs/image-2.png)
+
+- In your fork, navigate to the "Actions" tab in the repository and select the workflow.
 
 ![alt text](./imgs/image.png)
 
-Trigger it manually
+ - Trigger it manually
 
-![alt text](./imgs/image-1.png)
-
+ ![alt text](./imgs/image-1.png)
 
 ## Usage
 
