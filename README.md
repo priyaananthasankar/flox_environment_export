@@ -21,7 +21,7 @@ To run the GitHub Action, do the following:
 
 - Fork the repo
 
-- Configure Azure Storage Access Key 
+- In your fork, navigate to the "Settings" tab  and configure Azure Storage Access Key 
 
 ![alt text](./imgs/image-2.png)
 
@@ -29,7 +29,7 @@ To run the GitHub Action, do the following:
 
 ![alt text](./imgs/image.png)
 
- - Trigger it manually
+ - Provide all the mandatory inputs and trigger the workflow by clicking `Run Workflow`
 
  ![alt text](./imgs/image-1.png)
 
