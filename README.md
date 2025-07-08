@@ -33,7 +33,7 @@ To run the GitHub Action, do the following:
 
  ![alt text](./imgs/image-1.png)
 
-## Usage
+## CLI Usage
 
 ### 1. Export a Flox Environment
 
