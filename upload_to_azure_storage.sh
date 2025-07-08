@@ -5,8 +5,8 @@
 EXPORT_DIR="$1"
 STORAGE_ACCOUNT="$2"
 FILE_SHARE="$3"
-SHARE_DIR="$4"
-STORAGE_KEY="$5"
+STORAGE_KEY="$4"
+SHARE_DIR="$5"
 
 if [[ -z "$EXPORT_DIR" || -z "$STORAGE_ACCOUNT" || -z "$FILE_SHARE" ]]; then
     echo "Usage: $0 <export_folder> <storage_account> <file_share> <storage_account_key> [<share_directory>]"

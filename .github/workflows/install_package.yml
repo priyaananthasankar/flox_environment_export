@@ -67,5 +67,5 @@ jobs:
               # Export environment
               /workspace/export_env.sh /home/nixuser/$ENV_NAME
               # Upload to Azure Storage
-              /workspace/upload_to_azure_storage.sh /home/nixuser/$ENV_NAME/export $STORAGE_ACCOUNT $STORAGE_KEY $STORAGE_FILE_SHARE
+              /workspace/upload_to_azure_storage.sh /home/nixuser/$ENV_NAME/export $STORAGE_ACCOUNT $STORAGE_FILE_SHARE $STORAGE_KEY 
             "
