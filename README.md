@@ -7,10 +7,8 @@ Easily export your Flox environment and upload it to Azure Storage for backup or
 - **Export Flox Environments:** Package all relevant files and directories from a specified Flox environment.
 - **Azure Upload:** Seamlessly upload exported environments to Azure File Shares for safe storage or collaboration.
 
-## Prerequisites
+## Prerequisites 
 
-- [Flox](https://floxdev.com/) installed and configured.
-- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) installed and logged in.
 - Access to an Azure Storage Account and File Share.
 
 ## GitHub Action
@@ -34,6 +32,13 @@ To run the GitHub Action, do the following:
  ![alt text](./imgs/image-1.png)
 
 ## CLI Usage
+
+Use this if you want to explore these scripts in your laptop
+
+## Prerequisites 
+
+- [Flox](https://floxdev.com/) installed and configured.
+- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) installed and logged in.
 
 ### 1. Export a Flox Environment
 
