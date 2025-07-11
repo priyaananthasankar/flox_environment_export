@@ -44,18 +44,29 @@ if [[ -z "$SHARE_DIR" ]]; then
         --name "$SHARE_DIR" \
         --query "exists" \
         --output tsv)
-    if [[ "$DIR_EXISTS" != "true" ]]; then
-        echo "Directory '$SHARE_DIR' does not exist. Creating it..."
-        az storage directory create \
+    if [[ "$DIR_EXISTS" == "true" ]]; then
+        echo "Directory '$SHARE_DIR' exists. Deleting it..."
+        az storage directory delete \
             --account-name "$STORAGE_ACCOUNT" \
             --account-key "$STORAGE_KEY" \
             --share-name "$FILE_SHARE" \
             --name "$SHARE_DIR"
         if [[ $? -ne 0 ]]; then
-            echo "Failed to create directory '$SHARE_DIR' in Azure File Share."
+            echo "Failed to delete directory '$SHARE_DIR' in Azure File Share."
             exit 1
         fi
     fi
+    echo "Creating directory '$SHARE_DIR'..."
+    az storage directory create \
+        --account-name "$STORAGE_ACCOUNT" \
+        --account-key "$STORAGE_KEY" \
+        --share-name "$FILE_SHARE" \
+        --name "$SHARE_DIR"
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to create directory '$SHARE_DIR' in Azure File Share."
+        exit 1
+    fi
+    
 fi
 
 if [[ -z "$EXPORT_DIR" || -z "$STORAGE_ACCOUNT" || -z "$FILE_SHARE" || -z "$SHARE_DIR" ]]; then
