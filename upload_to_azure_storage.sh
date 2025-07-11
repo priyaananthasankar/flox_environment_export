@@ -45,14 +45,15 @@ if [[ -z "$SHARE_DIR" ]]; then
         --query "exists" \
         --output tsv)
     if [[ "$DIR_EXISTS" == "true" ]]; then
-        echo "Directory '$SHARE_DIR' exists. Deleting it..."
+        echo "Directory '$SHARE_DIR' exists. Deleting it (force)..."
         az storage directory delete \
             --account-name "$STORAGE_ACCOUNT" \
             --account-key "$STORAGE_KEY" \
             --share-name "$FILE_SHARE" \
-            --name "$SHARE_DIR"
+            --name "$SHARE_DIR" \
+            --force
         if [[ $? -ne 0 ]]; then
-            echo "Failed to delete directory '$SHARE_DIR' in Azure File Share."
+            echo "Failed to force delete directory '$SHARE_DIR' in Azure File Share."
             exit 1
         fi
     fi
