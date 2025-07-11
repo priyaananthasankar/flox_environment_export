@@ -40,7 +40,7 @@ jobs:
           STORAGE_ACCOUNT="${{ github.event.inputs.azure_storage_name }}"
           STORAGE_FILE_SHARE="${{ github.event.inputs.azure_storage_file_share }}"
           STORAGE_KEY="${{ secrets.storage_key }}"
-          ENV_NAME="ci-flox-env"
+          ENV_NAME="userenv"
 
           if [ -z "$VERSION" ]; then
             INSTALL_CMD="flox install $LIBRARY"
