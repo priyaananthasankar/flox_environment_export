@@ -29,7 +29,7 @@ ln -s /home/nixuser/.nix-profile/bin/nix /usr/local/bin/nix  && ln -s /home/nixu
 
 # Install flox using nix
 chown -R nixuser:nixuser /nix
-runuser -l nixuser -c '. "/home/nixuser/.nix-profile/etc/profile.d/nix.sh" && nix --extra-experimental-features "nix-command flakes" profile install --accept-flake-config github:flox/flox'
+runuser -l nixuser -c '. "/home/nixuser/.nix-profile/etc/profile.d/nix.sh" && nix --extra-experimental-features "nix-command flakes" profile install --accept-flake-config github:flox/flox/v1.4.4'
 
 # Symlink flox to /usr/local/bin for global access
 ln -sf /home/nixuser/.nix-profile/bin/flox /usr/local/bin/flox
