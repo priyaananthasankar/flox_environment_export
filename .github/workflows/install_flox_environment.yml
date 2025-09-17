@@ -1,4 +1,4 @@
-name: Export a FloxHub Environment
+name: Export an existing FloxHub Environment into Azure Storage
 
 on:
   workflow_dispatch:
