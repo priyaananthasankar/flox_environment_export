@@ -1,4 +1,4 @@
-name: Export and Upload Flox Environment
+name: Export a FloxHub Environment
 
 on:
   workflow_dispatch:
