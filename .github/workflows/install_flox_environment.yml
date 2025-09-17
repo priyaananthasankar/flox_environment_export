@@ -1,0 +1,72 @@
+name: Export and Upload Flox Environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      floxhub_username:
+        description: "floxhub username (used for naming / provenance)"
+        required: true
+      floxhub_env_name:
+        description: "floxhub environment name to create/export"
+        required: true
+      azure_storage_name:
+        description: "Azure Storage Account Name"
+        required: true
+      azure_storage_file_share:
+        description: "Azure Storage File Share Name"
+        required: true
+      storage_key:
+        description: "Azure Storage Account Key"
+        required: false
+        # Using a secret reference at runtime; inputs only support primitive types. Define secret in repo settings as `storage_key`.
+
+jobs:
+  export-and-upload:
+    runs-on: ubuntu-latest
+    env:
+      AZURE_STORAGE_KEY: ${{ secrets.storage_key }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Pull Azure Linux Mariner image
+        run: |
+          docker pull mcr.microsoft.com/cbl-mariner/base/core:2.0
+
+      - name: Run Flox export in container
+        run: |
+          FLOXHUB_USER="${{ github.event.inputs.floxhub_username }}"
+          FLOXHUB_ENV="${{ github.event.inputs.floxhub_env_name }}"
+          STORAGE_ACCOUNT="${{ github.event.inputs.azure_storage_name }}"
+          STORAGE_FILE_SHARE="${{ github.event.inputs.azure_storage_file_share }}"
+          STORAGE_KEY="${{ secrets.storage_key }}"
+          # Use provided floxhub environment name (sanitize to simple characters)
+          ENV_NAME="$FLOXHUB_ENV"
+
+          # Basic sanitization (remove spaces and disallowed chars)
+          ENV_NAME=$(echo "$ENV_NAME" | tr -cd 'A-Za-z0-9._-')
+
+          echo "Creating flox environment '$ENV_NAME' for floxhub user '$FLOXHUB_USER'"
+
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            -e AZURE_STORAGE_KEY="$STORAGE_KEY" \
+            mcr.microsoft.com/cbl-mariner/base/core:2.0 \
+            bash -c "
+              tdnf install -y ca-certificates
+              tdnf install -y util-linux which git wget bash coreutils which sudo tar gzip azure-cli
+              chmod +x /workspace/chroot-flox-install.sh
+              /workspace/chroot-flox-install.sh
+              chown -R nixuser:nixuser /home/nixuser
+              # Create flox environment and install library
+                su - nixuser <<EOF
+                        mkdir /home/nixuser/$ENV_NAME && cd /home/nixuser/$ENV_NAME
+                        flox pull $FLOXHUB_USER/$ENV_NAME
+                EOF
+              # Make the flox and simple store world writable 
+              chmod -R 777 .flox simple-store
+              # Export environment
+              /workspace/export_env.sh /home/nixuser/$ENV_NAME
+              # Upload to Azure Storage
+              /workspace/upload_to_azure_storage.sh /home/nixuser/$ENV_NAME/export $STORAGE_ACCOUNT $STORAGE_FILE_SHARE $STORAGE_KEY 
+            "
