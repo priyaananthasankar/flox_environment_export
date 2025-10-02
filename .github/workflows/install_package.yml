@@ -62,7 +62,7 @@ jobs:
                     flox install \"\$lib\"
                   fi
                 done
-OUTER_EOF
+              OUTER_EOF
               # Make the flox and simple store world writable 
               chmod -R 777 .flox simple-store
               # Export environment
