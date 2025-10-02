@@ -3,12 +3,9 @@ name: Create a Flox Environment and Upload to Azure Storage
 on:
   workflow_dispatch:
     inputs:
-      library_name:
-        description: "Library name to install"
+      library_list:
+        description: "Comma-separated list of libraries to install"
         required: true
-      version:
-        description: "Library version (optional)"
-        required: false
       azure_storage_name:
         description: "Azure Storage Account Name"
         required: true
@@ -35,18 +32,11 @@ jobs:
 
       - name: Run Flox export in container
         run: |
-          LIBRARY="${{ github.event.inputs.library_name }}"
-          VERSION="${{ github.event.inputs.version }}"
+          LIBRARY_LIST="${{ github.event.inputs.library_list }}"
           STORAGE_ACCOUNT="${{ github.event.inputs.azure_storage_name }}"
           STORAGE_FILE_SHARE="${{ github.event.inputs.azure_storage_file_share }}"
           STORAGE_KEY="${{ secrets.storage_key }}"
           ENV_NAME="userenv"
-
-          if [ -z "$VERSION" ]; then
-            INSTALL_CMD="flox install $LIBRARY"
-          else
-            INSTALL_CMD="flox install $LIBRARY@$VERSION"
-          fi
 
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
@@ -58,11 +48,14 @@ jobs:
               chmod +x /workspace/chroot-flox-install.sh
               /workspace/chroot-flox-install.sh
               chown -R nixuser:nixuser /home/nixuser
-              # Create flox environment and install library
+              # Create flox environment and install libraries
                 su - nixuser <<EOF
                         mkdir /home/nixuser/$ENV_NAME && cd /home/nixuser/$ENV_NAME
                         flox init
-                        $INSTALL_CMD
+                        IFS=',' read -ra LIBS <<< \"$LIBRARY_LIST\"
+                        for lib in \"\${LIBS[@]}\"; do
+                          flox install \"\$lib\"
+                        done
                 EOF
               # Make the flox and simple store world writable 
               chmod -R 777 .flox simple-store
