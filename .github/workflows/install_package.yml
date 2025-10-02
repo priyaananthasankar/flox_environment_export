@@ -12,10 +12,17 @@ on:
       azure_storage_file_share:
         description: "Azure Storage File Share Name"
         required: true
+      storage_key:
+        description: "Azure Storage Account Key"
+        required: false
+        type: secret
+        # Note: GitHub Actions inputs don't support type: secret
 
 jobs:
   export-and-upload:
     runs-on: ubuntu-latest
+    env:
+      AZURE_STORAGE_KEY: ${{ secrets.storage_key }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,19 +39,11 @@ jobs:
           STORAGE_KEY="${{ secrets.storage_key }}"
           ENV_NAME="userenv"
 
-          # Validate that the storage key secret is configured
-          if [ -z "$STORAGE_KEY" ]; then
-            echo "ERROR: Storage key secret is not configured. Please add 'storage_key' to repository secrets."
-            exit 1
-          fi
-
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
+            -e AZURE_STORAGE_KEY="$STORAGE_KEY" \
             -e LIBRARY_LIST="$LIBRARY_LIST" \
             -e ENV_NAME="$ENV_NAME" \
-            -e STORAGE_ACCOUNT="$STORAGE_ACCOUNT" \
-            -e STORAGE_FILE_SHARE="$STORAGE_FILE_SHARE" \
-            -e STORAGE_KEY="$STORAGE_KEY" \
             mcr.microsoft.com/cbl-mariner/base/core:2.0 \
             bash -c "
               tdnf install -y ca-certificates
@@ -54,11 +53,11 @@ jobs:
               chown -R nixuser:nixuser /home/nixuser
               # Create flox environment and install libraries
               su - nixuser -c \"
-                mkdir /home/nixuser/\\\$ENV_NAME && cd /home/nixuser/\\\$ENV_NAME
+                mkdir /home/nixuser/\$ENV_NAME && cd /home/nixuser/\$ENV_NAME
                 flox init
                 
                 # Split the comma-separated library list and install each
-                echo '\\\$LIBRARY_LIST' | tr ',' '\n' | while read -r lib; do
+                echo '\$LIBRARY_LIST' | tr ',' '\n' | while read -r lib; do
                   lib=\\\$(echo \\\"\\\$lib\\\" | xargs)  # trim whitespace
                   if [ -n \\\"\\\$lib\\\" ]; then
                     echo \\\"Installing library: \\\$lib\\\"
@@ -67,15 +66,10 @@ jobs:
                 done
               \"
               # Make the flox and simple store world writable (in the correct directory)
-              cd /home/nixuser/\\\$ENV_NAME
+              cd /home/nixuser/\$ENV_NAME
               chmod -R 777 .flox /nix/store 2>/dev/null || true
               # Export environment (run as nixuser to ensure proper context)
-              su - nixuser -c \"cd /home/nixuser/\\\$ENV_NAME && /workspace/export_env.sh /home/nixuser/\\\$ENV_NAME\"
+              su - nixuser -c \"cd /home/nixuser/\$ENV_NAME && /workspace/export_env.sh /home/nixuser/\$ENV_NAME\"
               # Upload to Azure Storage
-              echo \"Debug: About to upload with parameters:\"
-              echo \"Export folder: /home/nixuser/\\\$ENV_NAME/export\"
-              echo \"Storage account: \\\$STORAGE_ACCOUNT\"
-              echo \"File share: \\\$STORAGE_FILE_SHARE\"
-              echo \"Storage key length: \${#STORAGE_KEY}\"
-              /workspace/upload_to_azure_storage.sh /home/nixuser/\\\$ENV_NAME/export \"\\\$STORAGE_ACCOUNT\" \"\\\$STORAGE_FILE_SHARE\" \"\\\$STORAGE_KEY\"
+              /workspace/upload_to_azure_storage.sh /home/nixuser/\$ENV_NAME/export \$STORAGE_ACCOUNT \$STORAGE_FILE_SHARE \$STORAGE_KEY 
             "
