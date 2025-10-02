@@ -50,13 +50,15 @@ jobs:
               chown -R nixuser:nixuser /home/nixuser
               # Create flox environment and install libraries
                 su - nixuser <<EOF
-                        mkdir /home/nixuser/$ENV_NAME && cd /home/nixuser/$ENV_NAME
-                        flox init
-                        IFS=',' read -ra LIBS <<< \"$LIBRARY_LIST\"
-                        for lib in \"\${LIBS[@]}\"; do
-                          flox install \"\$lib\"
-                        done
-                EOF
+                mkdir /home/nixuser/$ENV_NAME && cd /home/nixuser/$ENV_NAME
+                flox init
+                IFS=',' read -ra LIBS <<< \"$LIBRARY_LIST\"
+                for lib in \"\${LIBS[@]}\"; do
+                  lib=\$(echo \"\$lib\" | xargs)
+                  [ -z \"\$lib\" ] && continue
+                  flox install \"\$lib\"
+                done  
+              EOF
               # Make the flox and simple store world writable 
               chmod -R 777 .flox simple-store
               # Export environment
