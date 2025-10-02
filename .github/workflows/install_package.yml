@@ -42,6 +42,7 @@ jobs:
             -v ${{ github.workspace }}:/workspace \
             -e AZURE_STORAGE_KEY="$STORAGE_KEY" \
             -e LIBRARY_LIST="$LIBRARY_LIST" \
+            -e ENV_NAME="$ENV_NAME" \
             mcr.microsoft.com/cbl-mariner/base/core:2.0 \
             bash -c "
               tdnf install -y ca-certificates
@@ -50,23 +51,23 @@ jobs:
               /workspace/chroot-flox-install.sh
               chown -R nixuser:nixuser /home/nixuser
               # Create flox environment and install libraries
-              su - nixuser <<'OUTER_EOF'
-                mkdir /home/nixuser/$ENV_NAME && cd /home/nixuser/$ENV_NAME
+              su - nixuser -c \"
+                mkdir /home/nixuser/\$ENV_NAME && cd /home/nixuser/\$ENV_NAME
                 flox init
                 
                 # Split the comma-separated library list and install each
-                echo \"\$LIBRARY_LIST\" | tr ',' '\n' | while read -r lib; do
-                  lib=\$(echo \"\$lib\" | xargs)  # trim whitespace
-                  if [ -n \"\$lib\" ]; then
-                    echo \"Installing library: \$lib\"
-                    flox install \"\$lib\"
+                echo '\$LIBRARY_LIST' | tr ',' '\n' | while read -r lib; do
+                  lib=\\\$(echo \\\"\\\$lib\\\" | xargs)  # trim whitespace
+                  if [ -n \\\"\\\$lib\\\" ]; then
+                    echo \\\"Installing library: \\\$lib\\\"
+                    flox install \\\"\\\$lib\\\"
                   fi
                 done
-              OUTER_EOF
+              \"
               # Make the flox and simple store world writable 
               chmod -R 777 .flox simple-store
               # Export environment
-              /workspace/export_env.sh /home/nixuser/$ENV_NAME
+              /workspace/export_env.sh /home/nixuser/\$ENV_NAME
               # Upload to Azure Storage
-              /workspace/upload_to_azure_storage.sh /home/nixuser/$ENV_NAME/export $STORAGE_ACCOUNT $STORAGE_FILE_SHARE $STORAGE_KEY 
+              /workspace/upload_to_azure_storage.sh /home/nixuser/\$ENV_NAME/export \$STORAGE_ACCOUNT \$STORAGE_FILE_SHARE \$STORAGE_KEY 
             "
