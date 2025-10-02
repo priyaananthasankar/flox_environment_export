@@ -15,7 +15,7 @@ on:
       storage_key:
         description: "Azure Storage Account Key"
         required: false
-        type: secret
+        # Note: GitHub Actions inputs don't support type: secret
 
 jobs:
   export-and-upload:
@@ -41,6 +41,7 @@ jobs:
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             -e AZURE_STORAGE_KEY="$STORAGE_KEY" \
+            -e LIBRARY_LIST="$LIBRARY_LIST" \
             mcr.microsoft.com/cbl-mariner/base/core:2.0 \
             bash -c "
               tdnf install -y ca-certificates
@@ -49,16 +50,19 @@ jobs:
               /workspace/chroot-flox-install.sh
               chown -R nixuser:nixuser /home/nixuser
               # Create flox environment and install libraries
-                su - nixuser <<EOF
+              su - nixuser <<'OUTER_EOF'
                 mkdir /home/nixuser/$ENV_NAME && cd /home/nixuser/$ENV_NAME
                 flox init
-                IFS=',' read -ra LIBS <<< \"$LIBRARY_LIST\"
-                for lib in \"\${LIBS[@]}\"; do
-                  lib=\$(echo \"\$lib\" | xargs)
-                  [ -z \"\$lib\" ] && continue
-                  flox install \"\$lib\"
-                done  
-              EOF
+                
+                # Split the comma-separated library list and install each
+                echo \"\$LIBRARY_LIST\" | tr ',' '\n' | while read -r lib; do
+                  lib=\$(echo \"\$lib\" | xargs)  # trim whitespace
+                  if [ -n \"\$lib\" ]; then
+                    echo \"Installing library: \$lib\"
+                    flox install \"\$lib\"
+                  fi
+                done
+OUTER_EOF
               # Make the flox and simple store world writable 
               chmod -R 777 .flox simple-store
               # Export environment
