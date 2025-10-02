@@ -64,10 +64,11 @@ jobs:
                   fi
                 done
               \"
-              # Make the flox and simple store world writable 
-              chmod -R 777 .flox simple-store
-              # Export environment
-              /workspace/export_env.sh /home/nixuser/\$ENV_NAME
+              # Make the flox and simple store world writable (in the correct directory)
+              cd /home/nixuser/\$ENV_NAME
+              chmod -R 777 .flox /nix/store 2>/dev/null || true
+              # Export environment (run as nixuser to ensure proper context)
+              su - nixuser -c \"cd /home/nixuser/\$ENV_NAME && /workspace/export_env.sh /home/nixuser/\$ENV_NAME\"
               # Upload to Azure Storage
               /workspace/upload_to_azure_storage.sh /home/nixuser/\$ENV_NAME/export \$STORAGE_ACCOUNT \$STORAGE_FILE_SHARE \$STORAGE_KEY 
             "
