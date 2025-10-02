@@ -15,6 +15,7 @@ on:
       storage_key:
         description: "Azure Storage Account Key"
         required: false
+        type: secret
         # Note: GitHub Actions inputs don't support type: secret
 
 jobs:
