@@ -12,17 +12,10 @@ on:
       azure_storage_file_share:
         description: "Azure Storage File Share Name"
         required: true
-      storage_key:
-        description: "Azure Storage Account Key"
-        required: false
-        type: secret
-        # Note: GitHub Actions inputs don't support type: secret
 
 jobs:
   export-and-upload:
     runs-on: ubuntu-latest
-    env:
-      AZURE_STORAGE_KEY: ${{ secrets.storage_key }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,11 +32,19 @@ jobs:
           STORAGE_KEY="${{ secrets.storage_key }}"
           ENV_NAME="userenv"
 
+          # Validate inputs
+          if [ -z "$STORAGE_KEY" ]; then
+            echo "ERROR: storage_key secret is not configured"
+            exit 1
+          fi
+
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
-            -e AZURE_STORAGE_KEY="$STORAGE_KEY" \
             -e LIBRARY_LIST="$LIBRARY_LIST" \
             -e ENV_NAME="$ENV_NAME" \
+            -e STORAGE_ACCOUNT="$STORAGE_ACCOUNT" \
+            -e STORAGE_FILE_SHARE="$STORAGE_FILE_SHARE" \
+            -e STORAGE_KEY="$STORAGE_KEY" \
             mcr.microsoft.com/cbl-mariner/base/core:2.0 \
             bash -c "
               tdnf install -y ca-certificates
@@ -75,13 +76,6 @@ jobs:
               echo \"ENV_NAME: \$ENV_NAME\"
               echo \"STORAGE_ACCOUNT: \$STORAGE_ACCOUNT\"
               echo \"STORAGE_FILE_SHARE: \$STORAGE_FILE_SHARE\"
-              echo \"STORAGE_KEY: \${STORAGE_KEY:0:5}...\" # Show first 5 chars for security
-              echo '=== Debug: Directory contents ==='
-              ls -la /home/nixuser/\$ENV_NAME/
-              echo '=== Debug: Export directory contents ==='
-              ls -la /home/nixuser/\$ENV_NAME/export/ 2>/dev/null || echo 'Export directory does not exist'
-              echo '=== Debug: Script permissions ==='
-              ls -la /workspace/upload_to_azure_storage.sh
               echo '=== Running upload script ==='
-              /workspace/upload_to_azure_storage.sh /home/nixuser/\$ENV_NAME/export \$STORAGE_ACCOUNT \$STORAGE_FILE_SHARE \$STORAGE_KEY || echo 'Upload script failed with exit code: \$?'
+              /workspace/upload_to_azure_storage.sh /home/nixuser/\$ENV_NAME/export \"\$STORAGE_ACCOUNT\" \"\$STORAGE_FILE_SHARE\" \"\$STORAGE_KEY\"
               "
