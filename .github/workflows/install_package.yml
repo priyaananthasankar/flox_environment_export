@@ -71,5 +71,5 @@ jobs:
               # Export environment (run as nixuser to ensure proper context)
               su - nixuser -c \"cd /home/nixuser/\$ENV_NAME && /workspace/export_env.sh /home/nixuser/\$ENV_NAME\"
               # Upload to Azure Storage
-              /workspace/upload_to_azure_storage.sh /home/nixuser/\$ENV_NAME/export \$STORAGE_ACCOUNT \$STORAGE_FILE_SHARE \$STORAGE_KEY 
+              su - nixuser -c \"/workspace/upload_to_azure_storage.sh /home/nixuser/\$ENV_NAME/export \$STORAGE_ACCOUNT \$STORAGE_FILE_SHARE \$STORAGE_KEY\"
             "
