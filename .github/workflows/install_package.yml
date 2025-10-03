@@ -3,8 +3,8 @@ name: Create a Flox Environment and Upload to Azure Storage
 on:
   workflow_dispatch:
     inputs:
-      library_name:
-        description: "List of library names comma-separated"
+      library_list:
+        description: "Comma-separated list of libraries to install"
         required: true
       azure_storage_name:
         description: "Azure Storage Account Name"
@@ -16,6 +16,7 @@ on:
         description: "Azure Storage Account Key"
         required: false
         type: secret
+        # Note: GitHub Actions inputs don't support type: secret
 
 jobs:
   export-and-upload:
@@ -32,7 +33,7 @@ jobs:
 
       - name: Run Flox export in container
         run: |
-          LIBRARY_LIST="${{ github.event.inputs.library_name }}"
+          LIBRARY_LIST="${{ github.event.inputs.library_list }}"
           STORAGE_ACCOUNT="${{ github.event.inputs.azure_storage_name }}"
           STORAGE_FILE_SHARE="${{ github.event.inputs.azure_storage_file_share }}"
           STORAGE_KEY="${{ secrets.storage_key }}"
@@ -41,6 +42,8 @@ jobs:
           docker run --rm \
             -v ${{ github.workspace }}:/workspace \
             -e AZURE_STORAGE_KEY="$STORAGE_KEY" \
+            -e LIBRARY_LIST="$LIBRARY_LIST" \
+            -e ENV_NAME="$ENV_NAME" \
             mcr.microsoft.com/cbl-mariner/base/core:2.0 \
             bash -c "
               tdnf install -y ca-certificates
@@ -48,20 +51,37 @@ jobs:
               chmod +x /workspace/chroot-flox-install.sh
               /workspace/chroot-flox-install.sh
               chown -R nixuser:nixuser /home/nixuser
-              # Create flox environment and install library
-                su - nixuser <<EOF
-                        mkdir /home/nixuser/$ENV_NAME && cd /home/nixuser/$ENV_NAME
-                        flox init
-                        IFS=',' read -ra LIBS <<< "$LIBRARY_LIST"
-                        for lib in "\${LIBS[@]}"; do
-                          lib=\$(echo \$lib | xargs)  # Trim whitespace
-                          flox install "\$lib"
-                        done
-                EOF
-              # Make the flox and simple store world writable 
-              chmod -R 777 .flox simple-store
-              # Export environment
-              /workspace/export_env.sh /home/nixuser/$ENV_NAME
+              # Create flox environment and install libraries
+              su - nixuser -c \"
+                mkdir /home/nixuser/\$ENV_NAME && cd /home/nixuser/\$ENV_NAME
+                flox init
+                
+                # Split the comma-separated library list and install each
+                echo '\$LIBRARY_LIST' | tr ',' '\n' | while read -r lib; do
+                  lib=\\\$(echo \\\"\\\$lib\\\" | xargs)  # trim whitespace
+                  if [ -n \\\"\\\$lib\\\" ]; then
+                    echo \\\"Installing library: \\\$lib\\\"
+                    flox install \\\"\\\$lib\\\"
+                  fi
+                done
+              \"
+              # Make the flox and simple store world writable (in the correct directory)
+              cd /home/nixuser/\$ENV_NAME
+              chmod -R 777 .flox /nix/store 2>/dev/null || true
+              # Export environment (run as nixuser to ensure proper context)
+              su - nixuser -c \"cd /home/nixuser/\$ENV_NAME && /workspace/export_env.sh /home/nixuser/\$ENV_NAME\"
               # Upload to Azure Storage
-              /workspace/upload_to_azure_storage.sh /home/nixuser/$ENV_NAME/export $STORAGE_ACCOUNT $STORAGE_FILE_SHARE $STORAGE_KEY 
-            "
+              echo '=== Debug: Environment variables ==='
+              echo \"ENV_NAME: \$ENV_NAME\"
+              echo \"STORAGE_ACCOUNT: \$STORAGE_ACCOUNT\"
+              echo \"STORAGE_FILE_SHARE: \$STORAGE_FILE_SHARE\"
+              echo \"STORAGE_KEY: \${STORAGE_KEY:0:5}...\" # Show first 5 chars for security
+              echo '=== Debug: Directory contents ==='
+              ls -la /home/nixuser/\$ENV_NAME/
+              echo '=== Debug: Export directory contents ==='
+              ls -la /home/nixuser/\$ENV_NAME/export/ 2>/dev/null || echo 'Export directory does not exist'
+              echo '=== Debug: Script permissions ==='
+              ls -la /workspace/upload_to_azure_storage.sh
+              echo '=== Running upload script ==='
+              /workspace/upload_to_azure_storage.sh /home/nixuser/\$ENV_NAME/export \$STORAGE_ACCOUNT \$STORAGE_FILE_SHARE \$STORAGE_KEY || echo 'Upload script failed with exit code: \$?'
+              "
